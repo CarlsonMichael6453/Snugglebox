@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import {
   BOX_COST,
   DUPE_STARDUST,
@@ -12,7 +12,7 @@ import {
   TIERS,
 } from "@/config";
 import { MOCHI_COLORS, creatureById, mochiById } from "@/data/creatures";
-import { canOpenBox, type Pose } from "@/game/logic";
+import { canOpenBox, sanitizeName, type Pose } from "@/game/logic";
 import { CreatureArt } from "@/components/CreatureArt";
 import { useGame, useType } from "@/state/GameContext";
 import { colors, tierStyle } from "@/theme";
@@ -169,10 +169,34 @@ function ColorSheet({ colorId }: { colorId: string }) {
 function SettingsSheet() {
   const game = useGame();
   const type = useType();
+  const [draft, setDraft] = useState(game.state.playerName);
+  const nextName = sanitizeName(draft);
+  const canSave = Boolean(nextName) && nextName !== game.state.playerName;
   return (
     <Scrim onClose={() => game.setOverlay(null)}>
       <View style={styles.sheet}>
         <Text style={[styles.revealName, { fontFamily: type.display }]}>Settings</Text>
+        <Text style={[styles.rowLabel, { fontFamily: type.body, marginTop: 12 }]}>Your name</Text>
+        <TextInput
+          value={draft}
+          onChangeText={setDraft}
+          maxLength={20}
+          placeholder="Your name"
+          placeholderTextColor="#C4A894"
+          autoCapitalize="words"
+          autoCorrect={false}
+          autoComplete="off"
+          accessibilityLabel="Your name"
+          style={[styles.nameInput, { fontFamily: type.display }]}
+        />
+        <Pressable
+          accessibilityRole="button"
+          disabled={!canSave}
+          onPress={() => game.setPlayerName(draft)}
+          style={[styles.nameSave, !canSave && styles.ctaOff]}
+        >
+          <Text style={[styles.primaryText, { fontFamily: type.display }]}>Save name</Text>
+        </Pressable>
         <View style={styles.row}>
           <Text style={[styles.rowLabel, { fontFamily: type.body }]}>Sound</Text>
           <Switch value={game.state.soundOn} onValueChange={game.setSound} trackColor={{ true: colors.coral, false: "#E4D3C2" }} />
@@ -243,7 +267,7 @@ function ResetSheet() {
       <View style={styles.sheet}>
         <Text style={[styles.revealName, { fontFamily: type.display }]}>Send every friend home?</Text>
         <Text style={[styles.description, { fontFamily: type.body }]}>
-          This clears the collection, stardust, pity, and the free-box timer. Handy for testing.
+          This clears your name, the collection, stardust, pity, and the free-box timer. Handy for testing.
         </Text>
         <Pressable style={styles.danger} onPress={game.resetGame}>
           <Text style={[styles.dangerText, { fontFamily: type.strong }]}>Reset</Text>
@@ -330,6 +354,26 @@ const styles = StyleSheet.create({
   miniArt: { width: 42, height: 42 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 12 },
   rowLabel: { color: colors.ink, fontSize: 16 },
+  nameInput: {
+    marginTop: 8,
+    backgroundColor: "#FFF9F4",
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "#F3C9D4",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 20,
+    color: colors.ink,
+    textAlign: "center",
+  },
+  nameSave: {
+    width: "100%",
+    backgroundColor: colors.coralDeep,
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginTop: 12,
+  },
   rateRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 8 },
   rateLabel: { width: 88, fontSize: 14 },
   rateTrack: { flex: 1, height: 8, borderRadius: 8, backgroundColor: "#F3E6D4", overflow: "hidden" },

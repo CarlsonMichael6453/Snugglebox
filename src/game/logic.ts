@@ -40,6 +40,8 @@ export type GameState = {
   fresh: string[];
   soundOn: boolean;
   hapticsOn: boolean;
+  /** Empty until the player finishes the welcome screen. */
+  playerName: string;
 };
 
 export type Presentation = {
@@ -73,7 +75,21 @@ export function initialState(): GameState {
     fresh: [],
     soundOn: true,
     hapticsOn: true,
+    playerName: "",
   };
+}
+
+const NAME_LIMIT = 20;
+
+/** Keep a short display name. Empty means the welcome screen should show. */
+export function sanitizeName(value: unknown): string {
+  if (typeof value !== "string") return "";
+  const cleaned = value.replace(/[\u0000-\u001F\u007F]/g, " ").replace(/\s+/g, " ").trim();
+  return Array.from(cleaned).slice(0, NAME_LIMIT).join("");
+}
+
+export function palsTitle(name: string): string {
+  return `${name}'s Pals`;
 }
 
 function asNumber(value: unknown, fallback: number): number {
@@ -125,6 +141,7 @@ export function sanitizeState(raw: unknown): GameState {
     fresh: Array.isArray(saved.fresh) ? saved.fresh.filter((item): item is string => typeof item === "string") : [],
     soundOn: saved.soundOn !== false,
     hapticsOn: saved.hapticsOn !== false,
+    playerName: sanitizeName(saved.playerName),
   };
 }
 

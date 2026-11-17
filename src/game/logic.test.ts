@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { RATES, PITY_THRESHOLD } from "../config.ts";
 import { CREATURES, MOCHI_COLORS, MOCHI_ID } from "../data/creatures.ts";
-import { albumStats, canOpenBox, initialState, performPull, type GameState } from "./logic.ts";
+import { albumStats, canOpenBox, initialState, palsTitle, performPull, sanitizeName, sanitizeState, type GameState } from "./logic.ts";
 
 const FREE_WAIT = 1000;
 
@@ -58,6 +58,18 @@ for (const rate of RATES) {
   const seen = counts[rate.tier] / sample;
   assert.ok(Math.abs(seen - rate.chance) < 0.03, `${rate.tier} ${seen} vs ${rate.chance}`);
 }
+
+assert.equal(sanitizeName("  Michael  "), "Michael");
+assert.equal(sanitizeName("A   very\nlong name that keeps going past the limit"), "A very long name tha");
+assert.equal(sanitizeName(12), "");
+assert.equal(palsTitle("Michael"), "Michael's Pals");
+const named = sanitizeState({ playerName: "  Pip  ", stardust: 10 });
+assert.equal(named.playerName, "Pip");
+assert.equal(named.stardust, 10);
+const kept = performPull({ ...initialState(), playerName: "Michael" }, zeros(), 1_000);
+assert.ok(kept);
+assert.equal(kept.state.playerName, "Michael");
+assert.equal(initialState().playerName, "");
 
 const discovered = albumStats(guaranteed.state);
 assert.ok(discovered.discovered >= 1);

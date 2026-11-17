@@ -8,6 +8,7 @@ import { Nunito_700Bold, Nunito_800ExtraBold } from "@expo-google-fonts/nunito";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GAME_NAME } from "@/config";
 import { GameOverlays } from "@/components/Overlays";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { GameProvider, useGame } from "@/state/GameContext";
 import { colors } from "@/theme";
 
@@ -51,8 +52,9 @@ export default function RootLayout() {
 }
 
 function Hydrated() {
-  const { ready } = useGame();
+  const { ready, state } = useGame();
   if (!ready) return <Boot />;
+  if (!state.playerName) return <WelcomeScreen />;
   return (
     <View style={styles.root}>
       <Slot />

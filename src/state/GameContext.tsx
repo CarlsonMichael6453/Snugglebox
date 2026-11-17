@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { initialState, performPull, forgetFresh, type GameState, type Presentation } from "@/game/logic";
+import { initialState, performPull, forgetFresh, sanitizeName, type GameState, type Presentation } from "@/game/logic";
 import { clearGame, loadGame, saveGame } from "@/game/storage";
 import { buzz, initFeedback, playSound } from "@/game/feedback";
 
@@ -38,6 +38,7 @@ type GameContextValue = {
   openAnother: () => void;
   setSound: (on: boolean) => void;
   setHaptics: (on: boolean) => void;
+  setPlayerName: (name: string) => void;
   resetGame: () => void;
   markSeen: (creatureId?: string, colorId?: string) => void;
 };
@@ -172,6 +173,13 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
     if (on) void buzz("selection", true);
   }, []);
 
+  const setPlayerName = useCallback((name: string) => {
+    const clean = sanitizeName(name);
+    if (!clean) return;
+    setState((current) => ({ ...current, playerName: clean }));
+    playSound("ui", stateRef.current.soundOn);
+  }, []);
+
   const resetGame = useCallback(() => {
     clearTimers();
     phaseRef.current = "idle";
@@ -210,6 +218,7 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
       openAnother,
       setSound,
       setHaptics,
+      setPlayerName,
       resetGame,
       markSeen,
     }),
@@ -228,6 +237,7 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
       openAnother,
       setSound,
       setHaptics,
+      setPlayerName,
       resetGame,
       markSeen,
     ],

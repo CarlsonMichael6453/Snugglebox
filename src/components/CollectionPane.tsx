@@ -4,6 +4,7 @@ import { TIER_LABEL, TIERS, type Tier } from "@/config";
 import { CREATURES, MOCHI_COLORS, MOCHI_ID } from "@/data/creatures";
 import { albumStats } from "@/game/logic";
 import { CreatureArt } from "@/components/CreatureArt";
+import { PalsTitle } from "@/components/PalsTitle";
 import { useGame, useType } from "@/state/GameContext";
 import { colors, tierStyle } from "@/theme";
 
@@ -33,6 +34,11 @@ export function CollectionPane({ showHeader = true }: { showHeader?: boolean }) 
       showsVerticalScrollIndicator={false}
       onLayout={(event) => setWidth(event.nativeEvent.layout.width - 32)}
     >
+      {game.state.playerName ? (
+        <View accessibilityRole="header" accessibilityLabel={`${game.state.playerName}'s Pals`}>
+          <PalsTitle name={game.state.playerName} variant="screen" />
+        </View>
+      ) : null}
       <View style={styles.summary}>
         <Text style={[styles.summaryTitle, { fontFamily: type.display }]}>
           {stats.discovered}/{stats.creatureTotal} friends

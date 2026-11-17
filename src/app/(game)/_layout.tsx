@@ -1,13 +1,17 @@
 import { Tabs } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useType } from "@/state/GameContext";
+import { PalsTitle } from "@/components/PalsTitle";
+import { palsTitle } from "@/game/logic";
+import { useGame, useType } from "@/state/GameContext";
 import { colors, useWide } from "@/theme";
 
 export default function GameLayout() {
   const wide = useWide();
   const insets = useSafeAreaInsets();
   const type = useType();
+  const { state } = useGame();
+  const pals = state.playerName ? palsTitle(state.playerName) : "Your Pals";
 
   return (
     <View style={styles.desk}>
@@ -20,9 +24,9 @@ export default function GameLayout() {
               : {
                   backgroundColor: colors.card,
                   borderTopColor: colors.line,
-                  height: 74 + insets.bottom,
+                  height: 88 + insets.bottom,
                   paddingBottom: insets.bottom,
-                  paddingTop: 8,
+                  paddingTop: 4,
                 },
             tabBarActiveTintColor: colors.coralDeep,
             tabBarInactiveTintColor: "#B29580",
@@ -39,7 +43,10 @@ export default function GameLayout() {
           <Tabs.Screen
             name="collection"
             options={{
-              title: "Friends",
+              title: pals,
+              tabBarAccessibilityLabel: pals,
+              tabBarLabel: () =>
+                state.playerName ? <PalsTitle name={state.playerName} variant="tab" /> : pals,
               tabBarIcon: ({ color }) => (
                 <View style={styles.paws}>
                   <View style={[styles.paw, { backgroundColor: color }]} />
