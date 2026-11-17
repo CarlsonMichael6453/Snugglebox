@@ -30,7 +30,7 @@ The app is a single-page bundle (`web.output: "single"`) with `experiments.baseU
 npx expo export -p web
 ```
 
-`export` writes `dist/`. Asset URLs are prefixed with `/Snugglebox`, so host the folder at that path. [`.github/workflows/pages.yml`](.github/workflows/pages.yml) does this on every push to `main`: it runs `npx expo export -p web`, copies `index.html` to `404.html` so GitHub Pages serves the app for `/Snugglebox/collection`, and adds `.nojekyll` so underscore asset names are not ignored. The live site is [https://carlsonmichael6453.github.io/Snugglebox/](https://carlsonmichael6453.github.io/Snugglebox/).
+`export` writes `dist/`. Asset URLs are prefixed with `/Snugglebox`, so host the folder at that path. [`.github/workflows/pages.yml`](.github/workflows/pages.yml) does this on every push to `main`: it runs `npx expo export -p web`, copies `index.html` to `404.html` so GitHub Pages serves the app for `/Snugglebox/collection`, and adds `.nojekyll` so underscore asset names are not ignored. After `main` is on GitHub, that workflow publishes [https://carlsonmichael6453.github.io/Snugglebox/](https://carlsonmichael6453.github.io/Snugglebox/).
 
 For Netlify, [`public/_redirects`](public/_redirects) is copied into `dist` and sends every path to `index.html`.
 
