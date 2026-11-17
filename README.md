@@ -11,7 +11,7 @@ npm install
 npx expo start --web
 ```
 
-Expo prints a localhost URL (add `--port 43123` if you want a specific port). The layout is a phone column with a bottom tab bar. At 980px and wider, the box and the dex sit side by side.
+Expo prints a localhost URL (add `--port 43123` if you want a specific port). The dev server serves the game at `/`. The exported site uses `experiments.baseUrl` `/snugglebox`, which is the GitHub Pages project path. The layout is a phone column with a bottom tab bar. At 980px and wider, the box and the dex sit side by side.
 
 ## Play it on a phone with Expo Go
 
@@ -24,14 +24,15 @@ This project only uses libraries that ship with Expo Go (SDK 58), so you do not 
 
 ## Static web export
 
-The app is configured with `web.output: "single"`, a single-page bundle you can host as static files.
+The app is a single-page bundle (`web.output: "single"`) with `experiments.baseUrl` set to `/snugglebox`.
 
 ```bash
 npx expo export -p web
-npx expo serve
 ```
 
-`export` writes `dist/`. `serve` hosts that folder so you can check the production bundle. For Netlify, [`public/_redirects`](public/_redirects) is copied into `dist` and sends every path to `index.html`. Other static hosts need the same fallback, because client routes are `/` and `/collection`.
+`export` writes `dist/`. Asset URLs are prefixed with `/snugglebox`, so host the folder at that path. [`.github/workflows/pages.yml`](.github/workflows/pages.yml) does this on every push to `main`: it runs `npx expo export -p web`, copies `index.html` to `404.html` so GitHub Pages serves the app for `/snugglebox/collection`, and adds `.nojekyll` so underscore asset names are not ignored. Once Pages is enabled, the site is [https://carlsonmichael6453.github.io/snugglebox/](https://carlsonmichael6453.github.io/snugglebox/).
+
+For Netlify, [`public/_redirects`](public/_redirects) is copied into `dist` and sends every path to `index.html`.
 
 ## What you can do
 
@@ -46,13 +47,13 @@ npx expo serve
 
 ## Art
 
-Creature stickers live in `assets/creatures/`:
+The creature pack is in `assets/creatures/`:
 
 - `common/`, `rare/`, `epic/`, `legendary/` — `<slug>-1.webp` and `<slug>-2.webp`
 - `mochi-colors/<color>-mochi.webp`
-- `silhouettes/` — locked dex shapes
+- `silhouettes/` — locked dex shapes, rebuilt with `python3 scripts/make_silhouettes.py`
 
-The original `creature-assets.tar.gz` pack was not available in this environment, so `scripts/generate_creatures.py` draws a sticker set in that layout. Drop real 512px webps on top of those filenames and restart Metro to use them. `scripts/generate_sounds.py` rebuilds the tiny tones in `assets/sounds/`.
+`scripts/generate_sounds.py` rebuilds the tiny tones in `assets/sounds/`.
 
 ## Project map
 
