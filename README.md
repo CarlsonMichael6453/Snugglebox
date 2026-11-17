@@ -11,7 +11,7 @@ npm install
 npx expo start --web
 ```
 
-Expo prints a localhost URL (add `--port 43123` if you want a specific port). The dev server serves the game at `/`. The exported site uses `experiments.baseUrl` `/snugglebox`, which is the GitHub Pages project path. The layout is a phone column with a bottom tab bar. At 980px and wider, the box and the dex sit side by side.
+Expo prints a localhost URL (add `--port 43123` if you want a specific port). The dev server serves the game at `/`. The exported site uses `experiments.baseUrl` `/Snugglebox`, which matches the case-sensitive GitHub Pages path for the `Snugglebox` repo. The layout is a phone column with a bottom tab bar. At 980px and wider, the box and the dex sit side by side.
 
 ## Play it on a phone with Expo Go
 
@@ -24,13 +24,13 @@ This project only uses libraries that ship with Expo Go (SDK 58), so you do not 
 
 ## Static web export
 
-The app is a single-page bundle (`web.output: "single"`) with `experiments.baseUrl` set to `/snugglebox`.
+The app is a single-page bundle (`web.output: "single"`) with `experiments.baseUrl` set to `/Snugglebox`.
 
 ```bash
 npx expo export -p web
 ```
 
-`export` writes `dist/`. Asset URLs are prefixed with `/snugglebox`, so host the folder at that path. [`.github/workflows/pages.yml`](.github/workflows/pages.yml) does this on every push to `main`: it runs `npx expo export -p web`, copies `index.html` to `404.html` so GitHub Pages serves the app for `/snugglebox/collection`, and adds `.nojekyll` so underscore asset names are not ignored. Once Pages is enabled, the site is [https://carlsonmichael6453.github.io/snugglebox/](https://carlsonmichael6453.github.io/snugglebox/).
+`export` writes `dist/`. Asset URLs are prefixed with `/Snugglebox`, so host the folder at that path. [`.github/workflows/pages.yml`](.github/workflows/pages.yml) does this on every push to `main`: it runs `npx expo export -p web`, copies `index.html` to `404.html` so GitHub Pages serves the app for `/Snugglebox/collection`, and adds `.nojekyll` so underscore asset names are not ignored. The live site is [https://carlsonmichael6453.github.io/Snugglebox/](https://carlsonmichael6453.github.io/Snugglebox/).
 
 For Netlify, [`public/_redirects`](public/_redirects) is copied into `dist` and sends every path to `index.html`.
 
