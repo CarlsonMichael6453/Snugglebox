@@ -14,6 +14,7 @@ import {
 import { MOCHI_COLORS, creatureById, mochiById } from "@/data/creatures";
 import { canOpenBox, sanitizeName, type Pose } from "@/game/logic";
 import { CreatureArt } from "@/components/CreatureArt";
+import { EnjoyPrompt, FeedbackSheet } from "@/components/FeedbackSheet";
 import { useGame, useType } from "@/state/GameContext";
 import { colors, tierStyle } from "@/theme";
 
@@ -36,6 +37,8 @@ export function GameOverlays() {
       {game.overlay?.kind === "settings" ? <SettingsSheet /> : null}
       {game.overlay?.kind === "rates" ? <RatesSheet /> : null}
       {game.overlay?.kind === "reset" ? <ResetSheet /> : null}
+      {game.overlay?.kind === "enjoy" ? <EnjoyPrompt /> : null}
+      {game.overlay?.kind === "feedback" ? <FeedbackSheet initialThumb={game.overlay.thumb} /> : null}
     </>
   );
 }
@@ -174,7 +177,7 @@ function SettingsSheet() {
   const canSave = Boolean(nextName) && nextName !== game.state.playerName;
   return (
     <Scrim onClose={() => game.setOverlay(null)}>
-      <View style={styles.sheet}>
+      <ScrollView style={styles.sheetScroll} contentContainerStyle={styles.sheet} keyboardShouldPersistTaps="handled">
         <Text style={[styles.revealName, { fontFamily: type.display }]}>Settings</Text>
         <Text style={[styles.rowLabel, { fontFamily: type.body, marginTop: 12 }]}>Your name</Text>
         <TextInput
@@ -208,13 +211,21 @@ function SettingsSheet() {
         <Text style={[styles.description, { fontFamily: type.body }]}>
           {GAME_NAME} keeps everything on this device. Rename the game in src/config.ts.
         </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Feedback"
+          onPress={() => game.setOverlay({ kind: "feedback", thumb: null })}
+          style={styles.feedback}
+        >
+          <Text style={[styles.feedbackText, { fontFamily: type.strong }]}>Feedback</Text>
+        </Pressable>
         <Pressable style={styles.danger} onPress={() => game.setOverlay({ kind: "reset" })}>
           <Text style={[styles.dangerText, { fontFamily: type.strong }]}>Reset collection</Text>
         </Pressable>
         <Pressable style={styles.secondary} onPress={() => game.setOverlay(null)}>
           <Text style={[styles.secondaryText, { fontFamily: type.strong }]}>Done</Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </Scrim>
   );
 }
@@ -337,6 +348,14 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   secondaryText: { color: colors.ink, fontSize: 16 },
+  feedback: {
+    borderRadius: 16,
+    paddingVertical: 12,
+    alignItems: "center",
+    backgroundColor: "#F8D0D8",
+    marginTop: 12,
+  },
+  feedbackText: { color: colors.coralDeep, fontSize: 16 },
   danger: {
     borderRadius: 16,
     paddingVertical: 12,

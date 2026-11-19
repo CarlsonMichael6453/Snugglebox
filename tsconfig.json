@@ -7,5 +7,5 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["node_modules", "src/game/logic.test.ts"]
+  "exclude": ["node_modules", "src/game/logic.test.ts", "src/game/playerFeedback.test.ts"]
 }

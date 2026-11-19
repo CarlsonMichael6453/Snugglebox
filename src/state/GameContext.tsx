@@ -9,7 +9,15 @@ import {
   type ReactNode,
 } from "react";
 import { initialState, performPull, forgetFresh, sanitizeName, type GameState, type Presentation } from "@/game/logic";
-import { clearGame, loadGame, saveGame } from "@/game/storage";
+import {
+  defaultFeedbackPrefs,
+  shouldOfferRating,
+  withPromptShown,
+  withSilenced,
+  type FeedbackPrefs,
+  type Thumb,
+} from "@/game/playerFeedback";
+import { clearGame, loadFeedbackPrefs, loadGame, saveFeedbackPrefs, saveGame } from "@/game/storage";
 import { buzz, initFeedback, playSound } from "@/game/feedback";
 
 export type Phase = "idle" | "shake" | "pop" | "reveal";
@@ -20,7 +28,9 @@ export type Overlay =
   | { kind: "rates" }
   | { kind: "reset" }
   | { kind: "detail"; creatureId: string }
-  | { kind: "color"; colorId: string };
+  | { kind: "color"; colorId: string }
+  | { kind: "enjoy" }
+  | { kind: "feedback"; thumb: Thumb | null };
 
 type GameContextValue = {
   ready: boolean;
@@ -41,6 +51,8 @@ type GameContextValue = {
   setPlayerName: (name: string) => void;
   resetGame: () => void;
   markSeen: (creatureId?: string, colorId?: string) => void;
+  rememberFeedbackSent: () => void;
+  dismissRatingForever: () => void;
 };
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -58,6 +70,7 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
   const phaseRef = useRef(phase);
   const presentationRef = useRef(presentation);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const feedbackPrefsRef = useRef<FeedbackPrefs | null>(null);
   stateRef.current = state;
   phaseRef.current = phase;
   presentationRef.current = presentation;
@@ -70,8 +83,9 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
   useEffect(() => {
     let cancelled = false;
     void initFeedback();
-    void loadGame().then((loaded) => {
+    void Promise.all([loadGame(), loadFeedbackPrefs()]).then(([loaded, prefs]) => {
       if (cancelled) return;
+      feedbackPrefsRef.current = prefs;
       setState(loaded.state);
       setSaveError(loaded.error);
       setReady(true);
@@ -150,11 +164,23 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
     if (card) playReveal(card);
   }, [clearTimers, playReveal]);
 
+  const persistFeedbackPrefs = useCallback((prefs: FeedbackPrefs) => {
+    feedbackPrefsRef.current = prefs;
+    void saveFeedbackPrefs(prefs).catch(() => undefined);
+  }, []);
+
   const dismissReveal = useCallback(() => {
+    const card = presentationRef.current;
     clearTimers();
     phaseRef.current = "idle";
     setPhase("idle");
-  }, [clearTimers]);
+    const prefs = feedbackPrefsRef.current;
+    if (!card || !prefs) return;
+    const now = Date.now();
+    if (!shouldOfferRating({ tier: card.tier, totalPulls: stateRef.current.totalPulls, prefs, now })) return;
+    persistFeedbackPrefs(withPromptShown(prefs, now));
+    setOverlay({ kind: "enjoy" });
+  }, [clearTimers, persistFeedbackPrefs]);
 
   const openAnother = useCallback(() => {
     clearTimers();
@@ -191,6 +217,17 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
     void clearGame();
   }, [clearTimers]);
 
+  const rememberFeedbackSent = useCallback(() => {
+    const now = Date.now();
+    persistFeedbackPrefs(withSilenced(feedbackPrefsRef.current ?? defaultFeedbackPrefs(), now));
+  }, [persistFeedbackPrefs]);
+
+  const dismissRatingForever = useCallback(() => {
+    const now = Date.now();
+    persistFeedbackPrefs(withSilenced(feedbackPrefsRef.current ?? defaultFeedbackPrefs(), now));
+    setOverlay(null);
+  }, [persistFeedbackPrefs]);
+
   const markSeen = useCallback((creatureId?: string, colorId?: string) => {
     const keys = [
       creatureId ? `c:${creatureId}` : "",
@@ -221,6 +258,8 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
       setPlayerName,
       resetGame,
       markSeen,
+      rememberFeedbackSent,
+      dismissRatingForever,
     }),
     [
       ready,
@@ -240,6 +279,8 @@ export function GameProvider({ children, fontsOn }: { children: ReactNode; fonts
       setPlayerName,
       resetGame,
       markSeen,
+      rememberFeedbackSent,
+      dismissRatingForever,
     ],
   );
 
