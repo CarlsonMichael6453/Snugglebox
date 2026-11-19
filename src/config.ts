@@ -56,4 +56,4 @@ export const SAVE_KEY = "@snugglebox/save/v1";
  * Where feedback and bug reports are addressed.
  * This is the only destination — the form builds a mailto link to it.
  */
-export const FEEDBACK_EMAIL = "feedback@example.com";
+export const FEEDBACK_EMAIL = "bykeh1sy@mail.grokbot.com";

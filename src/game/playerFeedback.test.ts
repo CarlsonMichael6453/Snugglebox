@@ -18,7 +18,7 @@ import {
 const day = 24 * 60 * 60 * 1000;
 const prefs = defaultFeedbackPrefs();
 
-assert.equal(FEEDBACK_EMAIL, "feedback@example.com");
+assert.equal(FEEDBACK_EMAIL, "bykeh1sy@mail.grokbot.com");
 assert.equal(RATING_PROMPT_MIN_PULLS, 10);
 assert.equal(RATING_PROMPT_INTERVAL_MS, 90 * day);
 
